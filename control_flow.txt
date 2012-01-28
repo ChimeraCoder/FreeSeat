@@ -1,0 +1,23 @@
+
+* Assume N people, T tables, each with Q(t) people at table t.
+* Assume all requests are symmetric (if A must sit with B, B must sit with A)
+
+* Input the list of seating requirements, with weights.
+
+* Create an N * N matrix that will store the requirement graph
+** The requirement graph will not distinguish between direct and transitive absoute requirements (if A must sit with B, and B must sit with C, that is equivalent to 'A must sit with B && A must sit with C'
+
+* Read each requirement from the list of seating requirements
+** If A must sit with B, then look up all of the people B must sit with, and A must sit with them as well (and they must sit with A)
+*** There is a more efficient way to store this matrix, as there are very few degrees of freedom, but worry about this later
+** If A must sit with B, and B must sit with C, but A CANNOT sit with C, then we have an unsatisfiable list of requirements.
+*** In this case, throw an error and ask for user input before proceeding
+
+
+* Once the matrix has been generated, create preliminary groups based on the absolute 'must sit' requirements alone
+** We know that this does not conflict with any of the absolute 'cannot sit' requirements, or else the error would have been caught when generating the matrix
+** Create a set of all the people who have not yet been placed in a group (initially contains everyone)
+** Pop off a person from the set, and place them in a group. Then, read their row in the matrix, and pull all of their 'must sit' relationships from the set as well, and place them in the group.
+*** If A is grouped, and B is pulled from the set as one of A's 'must sit' relationships, we don't need to worry about checking all of B's relationships, because we know that all of B's relationships have already been included in A's relationships (because of the transitive property).
+
+
