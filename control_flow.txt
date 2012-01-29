@@ -1,0 +1,75 @@
+
+* Assume N people, T tables, each with Q(t) people at table t.
+* Assume all requests are symmetric (if A must sit with B, B must sit with A)
+
+* Input the list of seating requirements, with weights.
+
+* Create an N * N matrix that will store the requirement graph
+** The requirement graph will not distinguish between direct and transitive absoute requirements (if A must sit with B, and B must sit with C, that is equivalent to 'A must sit with B && A must sit with C'
+
+* Read each requirement from the list of seating requirements
+** If A must sit with B, then look up all of the people B must sit with, and A must sit with them as well (and they must sit with A)
+*** There is a more efficient way to store this matrix, as there are very few degrees of freedom, but worry about this later
+** If A must sit with B, and B must sit with C, but A CANNOT sit with C, then we have an unsatisfiable list of requirements.
+*** In this case, throw an error and ask for user input before proceeding
+
+
+* Once the matrix has been generated, create preliminary groups based on the absolute 'must sit' requirements alone
+** We know that this does not conflict with any of the absolute 'cannot sit' requirements, or else the error would have been caught when generating the matrix
+** Create a set of all the people who have not yet been placed in a group (initially contains everyone)
+** Pop off a person from the set, and place them in a group. Then, read their row in the matrix, and pull all of their 'must sit' relationships from the set as well, and place them in the group.
+*** If A is grouped, and B is pulled from the set as one of A's 'must sit' relationships, we don't need to worry about checking all of B's relationships, because we know that all of B's relationships have already been included in A's relationships (because of the transitive property).
+
+
+
+
+* At this point, the people not yet in any groups have not had any requests satisfied (either positive or negative absolute), whereas everyone who is already in a group has had a positive absolute satisfied.
+** Currently, nobody has had a negative absolute violated
+
+* Check if the groups are too big, and if so, throw an error for the user to evaluate
+** If fixed table size, then Q(t) is a constant Q, so check if any group has size greater than Q
+*** If any group has size = Q (for the fixed-table-size case), freeze that group and place them at a table. Those people are no longer considered
+** If variable table size, this is a bit more work, but still straightforward
+
+* At this point, groups only consist of mutual absolute 'must's, so no group will be split (because we know that all groups are of acceptable size)
+** Therefore, we can treat the absolute AND soft preferences of the individuals in a group as a the absolute preferences of the group as a whole
+*** This will also be a good time to compute the group scores (see below), to take advantage of the iteration that is already occurring
+*** Computationally, this may be constructed earlier, to save an extra iteration/call to the matrix
+
+
+======Up until here, we are confident that an optimal-thus-far solution has been found, if it exists; otherwise, an error has been reported
+
+======Begin heuristics.
+====At this point, soft preferences start to matter.
+
+* A group is at this point exactly equivalent to a person, EXCEPT that the group 'takes up' multiple seats at a table
+
+* From here, we'll use a score-maximizing heuristic to create a solution
+
+* First, compute the initial scores of each group as it stands (before attempting to satisfy any non-absolute preferences)
+** This is probably best done earlier, to save an extra iteration
+
+Score definition:
+(Tentatively)
+Simply sum the scores (both positive and negative, absolutes included)
+
+* If A has a hard preference for C recorded, then C has the same hard preference for A recorded
+* If A has a soft preference for C recorded, then C SHOULD have the same hard preference for A, but it may not have been recorded yet (may still be zero)
+* Take this sum in a consistent way (probably by ensuring that everything is counted exactly once).
+* This entire sum is the COLLECTIVE score of the people in the group, so it is already correctly weighted (weighted by the number of people in the group)
+
+
+* Now, treat each of the still-ungrouped people as groups of one, with the scores defined in the same way (with the lone member in that group!), so the scores should all be zero.
+
+* Once the scores for the groups collectively have been computed, then we generate several (M) random distrubutions, satisfying the size constraints of Q(t) (or Q, if Q is a constant)
+** Pick the biggest group (deterministically), then pick (at random) a group such that the combination of those two groups does not exceed the table limit AND does not violate any negative absolute constraints/preferences
+** Once a group is of the same size as the maximum available table, remove that group from the running (as well as that maximum table!)
+** When generating these arrangements, ensure that no absolute negative constraints are violated.
+*** Keep in mind that this may not actually always be possible (or plausible, given the true number of feasible arrangements), so you may want to implement a threshold to prevent an infinite loop
+*** Since no groups are being split, absolute positive constraints are already guaranteed 
+
+* Pick the best M' of the M random groups (the M' groups with the highest scores), and keep track of those arrangements
+
+* Now, we may want to combine those groups? 
+
+* On the other hand, we can just report the top M' groups as possible solutions and let the user decide
