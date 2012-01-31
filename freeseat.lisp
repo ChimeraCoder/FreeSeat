@@ -28,10 +28,4 @@
        ;; of groups stored as lists and returns the groups populated
        ;; with people
        )
-
-     
-       
-
-
-
-(setf (aref 1 2) 5)
+     )
