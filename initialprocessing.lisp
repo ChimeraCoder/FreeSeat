@@ -10,14 +10,14 @@ symbols) is the guest list; the remainder are seating requests."
                (let ((sexp (read stream nil)))
                  (if sexp (cons sexp (read-sexp))
                      '()))))
-      (cons tables (read-sexp))))))
+      (read-sexp))))))
 
 (defun make-guest-list-lookup (guest-list)
 "Takes the guest list (in form '(PERSON1 PERSON2)) and returns a list
 containing a hash table from person names to id, an array of names,
 with each name at its proper id index, and the number of guests"
   (let ((guest-num -1))
-nn    (defun next-guest () (incf guest-num))
+    (defun next-guest () (incf guest-num))
     (defun num-guests () (1+ guest-num)))
 
   (let ((name-to-id (make-hash-table :test #'equalp))
@@ -92,8 +92,10 @@ lists of ids that represent groupings that must remain together."
 ;; then average the soft requests (error checking goes here)
 
 (defun groups-to-matrix2 (groups num-people matrix)
-"DOC ME"
-  ; make an empty, appropriately sized matrix
+"Takes the list of groups of 'musts', the number of people on the
+guest list, and the matrix that contains the list of requirements read
+in symmetrically and returns a new matrix where every member of a
+group has identical rows and columns"
 
   (defun process-score (score value status)
     ;; Take in score, value, status; return (newvalue . newstatus)
@@ -125,15 +127,42 @@ lists of ids that represent groupings that must remain together."
       (if (eql status :soft) (/ value (length group))
           value)))
 
-  ; This is only here to test
-  (compute-group-value groups num-people))
-          
-;  (defun compute-group-array (group)
-;    (let ((group-vector '()))
-;      (
-  ; for each group
-    ; create the group vector
-    ; iterate through every index
-      ; if any must, *must*
-      ; if any cannot, *cannot* CHECK ERRORS HERE
-      ; else average
+  (defun compute-group-array (group)
+    (let ((group-array (make-array num-people)))
+      (dotimes (i num-people)
+        (setf (aref group-array i) (compute-group-value group i)))
+      group-array))
+
+  (let ((new-matrix (make-array `(,num-people ,num-people))))
+    (defun set-row-sym (member array)
+      (dotimes (i num-people)
+        (let ((value (cond ((= (aref matrix i member) *must*) *must*)
+                           ((= (aref matrix i member) *cannot*) *cannot*)
+                           (t (aref array i)))))
+          (setf (aref new-matrix member i) value)
+          (setf (aref new-matrix i member) value))))
+    
+    (dolist (group groups)
+      (let ((array (compute-group-array group)))
+        (dolist (member group)
+          (set-row-sym member array))))
+    new-matrix))
+
+(defun initial-processing (filename)
+"Chains all of the functions together and returns a list of useful
+output: the tables list, name to id hash, id to name array, number of
+people, the groupings of people, and the trnasitively calculated
+scoring matrix"
+  (let ((input (read-file filename)))
+    (setf tables (first input))
+    (setf guest-list (second input))
+    (setf requests (third input)))
+  (let ((guests-processed (make-guest-list-lookup guest-list)))
+    (setf name-to-id (first guests-processed))
+    (setf id-to-name (second guests-processed))
+    (setf num-people (third guests-processed)))
+  (setf nontrans-matrix
+        (requirements-matrix-nontrans requests name-to-id num-people))
+  (setf groups (matrix-to-groups nontrans-matrix num-people))
+  (setf trans-matrix (groups-to-matrix2 groups num-people nontrans-matrix))
+  `(,tables ,name-to-id ,id-to-name ,num-people ,groups ,trans-matrix))
