@@ -153,7 +153,7 @@ group has identical rows and columns"
 (defun initial-processing (filename)
 "Chains all of the functions together and returns a list of useful
 output: the tables list, name to id hash, id to name array, number of
-people, the groupings of people, and the trnasitively calculated
+people, the groupings of people, and the transitively calculated
 scoring matrix"
   (let ((input (read-file filename)))
     (setf tables (first input))
