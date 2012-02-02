@@ -1,3 +1,5 @@
+(in-package :freeseat)
+
 (defparameter *must* 100)
 (defparameter *cannot* -100)
 
@@ -10,7 +12,7 @@ symbols) is the guest list; the remainder are seating requests."
                (let ((sexp (read stream nil)))
                  (if sexp (cons sexp (read-sexp))
                      '()))))
-      (read-sexp))))))
+      (read-sexp))))
 
 (defun make-guest-list-lookup (guest-list)
 "Takes the guest list (in form '(PERSON1 PERSON2)) and returns a list
