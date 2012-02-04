@@ -14,16 +14,18 @@
 
 ;;Calculate the score of a group of people
 (defun calculate-score (group)
+  (format t "calculate-score: ~a~%" group)
   (let ((head (car group))
         (tail (cdr group)))
     (if tail
         (+ (calculate-score-with-everyone-else head tail) ;;The score of the first person with each other person
-           (calculate-score group))                        ;;The scores of every other person EXCEPT the first, with each other
+           (calculate-score tail))                        ;;The scores of every other person EXCEPT the first, with each other
         '0)))                                               ;;The last person has already been compared to everyone else
     
 ;;Given a person A and a list of other people L, calculate the sum of
 ;;the pairwise scores of A with each person in L
 (defun calculate-score-with-everyone-else (person tail)
+  (format t "calc-score-with-everyone-else~%")
   ;;Sum the list of scores
   (apply '+
          ;;Calculate the pairwise score of the person with every person in the tail
@@ -38,7 +40,7 @@
   (let ((row-wise (score a b))
         (column-wise (score b a)))
     (if (eq row-wise '0)
-        (row-wise)
+        row-wise
         column-wise)))
 
 ;; This function is defined separately in case we want to separate the
@@ -68,6 +70,7 @@
 ;;now so it's easy to tweak our algorithm, since this is the core
 ;;heuristic
 (defun possibly-switch-groups (group1 group2)
+  (format t "possibly-switch-groups~%")
   (let* ((person1 (get-random-person group1))
          (person2 (get-random-person group2))
          (prescore1 (calculate-score group1))

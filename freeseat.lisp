@@ -14,12 +14,14 @@
 ;;Randomizes the order of the list
 ;;Fix the naming here
 (defun randomize-list (l)
+  (format t "randomize-list~%")
   (if l
       (let ((random-group (get-random-group l)))
         (cons random-group (randomize-list (remove random-group l))))
       '()))
   
 (defun combination-possible (group1 group2)
+  (format t "combination-poossible~%")
   (defun can-sit-p-p (person1 person2)
     (not (= (aref *matrix*  person1 person2) *cannot*)))
   (defun can-sit-p-g (person group)
@@ -38,6 +40,7 @@
 ;;Given a list l of randomized groups, combine any two groups if they
 ;;can be combined
 (defun combine-groups (l)
+  (format t "combine-groups~%")
   (if l 
       (let ((first-group (car l))
             (second-group (cadr l)))
