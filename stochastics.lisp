@@ -2,7 +2,7 @@
 
 ;;seeds the random state
 ;; don't do this yet!
-;(setf *random-state* (make-random-state t)) 
+(setf *random-state* (make-random-state t)) 
 
 
 ;;Assume global constant *MATRIX*
