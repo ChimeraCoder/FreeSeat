@@ -14,7 +14,6 @@
 
 ;;Calculate the score of a group of people
 (defun calculate-score (group)
-  (format t "calculate-score: ~a~%" group)
   (let ((head (car group))
         (tail (cdr group)))
     (if tail
@@ -25,7 +24,6 @@
 ;;Given a person A and a list of other people L, calculate the sum of
 ;;the pairwise scores of A with each person in L
 (defun calculate-score-with-everyone-else (person tail)
-  (format t "calc-score-with-everyone-else~%")
   ;;Sum the list of scores
   (apply '+
          ;;Calculate the pairwise score of the person with every person in the tail
@@ -70,10 +68,7 @@
 ;;now so it's easy to tweak our algorithm, since this is the core
 ;;heuristic
 (defun possibly-switch-groups (group1 group2)
-  (format t "possibly-switch-groups~%")
-  (let* ((person1 (get-random-person group1))
-         (person2 (get-random-person group2))
-         (prescore1 (calculate-score group1))
+  (let* ((prescore1 (calculate-score group1))
          (prescore2 (calculate-score group2))
          (switched-person-1 (get-random-person group1))
          (switched-person-2 (get-random-person group2))
@@ -86,6 +81,6 @@
          (pretotal (+ prescore1 prescore2))
          (posttotal (+ postscore1 postscore2)))
 
-    (if (or (> posttotal pretotal ) (> (/ posttotal pretotal) (random 1.0)))
-      (cons hypothetical-table-1 hypothetical-table-2)
+    (if (or (>= posttotal pretotal ) (> (/ posttotal pretotal) (random 1.0)))
+      (list hypothetical-table-1 hypothetical-table-2)
       '())))

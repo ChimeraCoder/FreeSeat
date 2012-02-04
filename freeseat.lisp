@@ -14,14 +14,12 @@
 ;;Randomizes the order of the list
 ;;Fix the naming here
 (defun randomize-list (l)
-  (format t "randomize-list~%")
   (if l
       (let ((random-group (get-random-group l)))
         (cons random-group (randomize-list (remove random-group l))))
       '()))
   
 (defun combination-possible (group1 group2)
-  (format t "combination-poossible~%")
   (defun can-sit-p-p (person1 person2)
     (not (= (aref *matrix*  person1 person2) *cannot*)))
   (defun can-sit-p-g (person group)
@@ -40,7 +38,6 @@
 ;;Given a list l of randomized groups, combine any two groups if they
 ;;can be combined
 (defun combine-groups (l)
-  (format t "combine-groups~%")
   (if l 
       (let ((first-group (car l))
             (second-group (cadr l)))
@@ -55,7 +52,6 @@
       '()))
 
 (defun mcmc (groups)
-  (format t "mcmc")
   (let* ((initial-configuration (combine-groups (randomize-list groups)))
          (group1 (get-random-group initial-configuration))
          (group2 (get-random-group initial-configuration))
@@ -63,12 +59,12 @@
     (if (or (equal group1 group2)
             (not switch-result))   ;;This can be optimized/combined
         ;;in a clever way using OR
-        (initial-configuration)
+        initial-configuration
         (cons (car switch-result) 
               (cons (cadr switch-result) 
                     (remove group1 
                             (remove group2 initial-configuration)))))))
-  
+
 
 
 ;TODO Figure out how to do parallel-let!
@@ -76,11 +72,11 @@
   (if (<= threads 0)
       '()
       (cons (iterate-mcmc groups iterations)
-            (many-parallel-mcmc groups threads (1- iterations)))))
+            (many-parallel-mcmc groups (1- threads) iterations))))
 
 (defun iterate-mcmc (groups iterations)
   (if (<= iterations 0)
       groups
       (iterate-mcmc (mcmc groups) (1- iterations))))
 
-(mcmc *groups*)
+(format t "~a" (iterate-mcmc *groups* 100))
