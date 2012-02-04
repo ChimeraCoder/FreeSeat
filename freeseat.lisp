@@ -1,14 +1,13 @@
 (in-package :freeseat)
 
-(let* ((filename "sampleinput.txt")
+(let* ((filename "FreeSeat Launch Party%21 - Sheet1.csv")
        (processed (initial-processing filename)))
-  (defvar *tables* (nth 0 processed))
-  (defvar *table-max-size* (car *tables*))
-  (defvar *name-to-id* (nth 1 processed))
-  (defvar *id-to-name* (nth 2 processed))
-  (defvar *num-people* (nth 3 processed))
-  (defvar *groups* (nth 4 processed))
-  (defvar *matrix* (nth 5 processed)))
+  (defvar *table-max-size* 5)
+  (defvar *name-to-id* (nth 0 processed))
+  (defvar *id-to-name* (nth 1 processed))
+  (defvar *num-people* (nth 2 processed))
+  (defvar *groups* (nth 3 processed))
+  (defvar *matrix* (nth 4 processed)))
 
 
 ;;Randomizes the order of the list
@@ -79,4 +78,10 @@
       groups
       (iterate-mcmc (mcmc groups) (1- iterations))))
 
-(format t "~a" (iterate-mcmc *groups* 100))
+(let ((n 0))
+  (defun counter () (incf n)))
+
+(dolist (group (iterate-mcmc *groups* 7000))
+  (format t "Group ~a:~%" (counter))
+  (dolist (member group)
+    (format t "  ~a~%" (aref *id-to-name* member))))

@@ -14,6 +14,102 @@ symbols) is the guest list; the remainder are seating requests."
                      '()))))
       (read-sexp))))
 
+(defun read-csv-file (filename)
+"Reads through a CSV file as dumped from Google. Returns a guest
+list (strings) and seating requests"
+  (defun get-row (stream)
+    (defun skip-timestamp ()
+      (when (not (eql (read-char stream) #\,))
+        (skip-timestamp)))
+    (defun get-string (end-char)
+      (let ((string (make-array 0
+                                :element-type 'character
+                                :fill-pointer 0
+                                :adjustable t)))
+        (defun get-string-to-comma ()
+          (let ((char (read-char stream nil end-char)))
+            (when (not (eql char end-char))
+              (vector-push-extend char string)
+              (get-string-to-comma))))
+        (get-string-to-comma)
+        string))
+    (skip-timestamp)
+    (list (get-string #\,)
+          (get-string #\,)
+          (get-string #\,)
+          (get-string #\,)
+          (get-string #\Newline))) ;fixme, doesn't work with multiple
+  (defun process-row (stream)
+    (defun next-position (string char)
+      (let ((length (length string)))
+        (labels ((n-n-p (i)
+                   (if (or (= i length)
+                           (eq (char string i) char))
+                       i
+                       (n-n-p (1+ i)))))
+          (n-n-p 0))))
+    (defun split (string char)
+      (if (= (length string) 0) '()
+          (let ((np (next-position string char)))
+            (cons (subseq string 0 np)
+                  (split (subseq string 
+                                 (min (1+ np)
+                                      (length string))
+                                 (length string))
+                         char)))))
+    (defun process-names (string)
+      (split (if (eql (char string 0) #\")
+                 (subseq string 1 (1- (length string)))
+                 string)
+             #\Newline))
+    (defun process-musts (name string)
+      (map 'list #'(lambda (x)
+                     (list *must* name x))
+           (process-names string)))
+    (defun process-cannots (name string)
+      (map 'list #'(lambda (x)
+                     (list *cannot* name x))
+           (process-names string)))
+    (defun process-shoulds (name string)
+      (map 'list #'(lambda (x)
+                     (list (parse-integer x :junk-allowed t)
+                           name
+                           (subseq x
+                                   (1+ (next-position x #\Space))
+                                   (length x))))
+           (process-names string)))
+    (defun process-shouldnots (name string)
+      (map 'list #'(lambda (x)
+                     (list (* -1 (parse-integer x :junk-allowed t))
+                           name
+                           (subseq x
+                                   (1+ (next-position x #\Space))
+                                   (length x))))
+           (process-names string)))
+    (let ((row (get-row stream)))
+      (let ((name (nth 0 row))) ; name
+        (list name 
+              (concatenate 'list
+                           (process-musts name (nth 1 row)) ; musts
+                           (process-cannots name (nth 2 row)) ; cannots
+                           (process-shoulds name (nth 3 row)) ; shoulds
+                           (process-shouldnots name (nth 4 row))))))) ; shouldnots
+  (let ((names (make-hash-table :test #'equalp))
+        (requests '()))
+    (with-open-file (stream filename)
+      (read-line stream) ; get the row titles out of the way
+      (let ((processed (process-row stream)))
+        (setf requests (concatenate 'list requests (second processed)))
+        (setf (gethash (car processed) names) t)
+        (map 'list #'(lambda (x)
+                       (setf (gethash (caddr x)
+                                      names)
+                             (car processed)))
+             (cadr processed)))
+      (let ((guests '()))
+        (maphash #'(lambda (k v) (push k guests)) names)
+        (list guests requests)))))
+
 (defun make-guest-list-lookup (guest-list)
 "Takes the guest list (in form '(PERSON1 PERSON2)) and returns a list
 containing a hash table from person names to id, an array of names,
@@ -23,7 +119,7 @@ with each name at its proper id index, and the number of guests"
     (defun num-guests () (1+ guest-num)))
 
   (let ((name-to-id (make-hash-table :test #'equalp))
-        (id-to-name (make-array 5 :adjustable t :fill-pointer 0)))
+        (id-to-name (make-array 5 :adjustable t :fill-pointer 0))) ; 5 is arbitrary
     (defun process-next-guest (guest-list)
       (let ((guest (car guest-list)))
         (when guest
@@ -155,10 +251,9 @@ group has identical rows and columns"
 output: the tables list, name to id hash, id to name array, number of
 people, the groupings of people, and the transitively calculated
 scoring matrix"
-  (let ((input (read-file filename)))
-    (setf tables (first input))
-    (setf guest-list (second input))
-    (setf requests (third input)))
+  (let ((input (read-csv-file filename)))
+    (setf guest-list (first input))
+    (setf requests (second input)))
   (let ((guests-processed (make-guest-list-lookup guest-list)))
     (setf name-to-id (first guests-processed))
     (setf id-to-name (second guests-processed))
@@ -167,4 +262,4 @@ scoring matrix"
         (requirements-matrix-nontrans requests name-to-id num-people))
   (setf groups (matrix-to-groups nontrans-matrix num-people))
   (setf trans-matrix (groups-to-matrix2 groups num-people nontrans-matrix))
-  `(,tables ,name-to-id ,id-to-name ,num-people ,groups ,trans-matrix))
+  (list name-to-id id-to-name num-people groups trans-matrix))
