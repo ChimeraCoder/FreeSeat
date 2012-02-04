@@ -1,0 +1,17 @@
+#! /bin/sh
+
+exec 2> /tmp/freeseat.error
+
+result=1
+
+
+while [ $result != 0 ]
+do 
+    clisp load.lisp
+    result=$?
+
+done
+
+echo "Success!"
+echo "Here are your seating arrangements."
+

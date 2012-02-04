@@ -216,14 +216,16 @@ group has identical rows and columns"
   ; of a group that contains a member with which the group cannot sit
   ; correct for me in compute-array/going from array to matrix
   (defun compute-group-value (group id)
-    (let ((value 0) (status :soft))
+    (if (= (length group) 0)
+      0
+      (let ((value 0) (status :soft))
       (dolist (group-member group)
         (let* ((score (aref matrix id group-member))
                (processed (process-score score value status)))
           (setf value (car processed))
           (setf status (cdr processed))))
       (if (eql status :soft) (/ value (length group))
-          value)))
+          value))))
 
   (defun compute-group-array (group)
     (let ((group-array (make-array num-people)))
