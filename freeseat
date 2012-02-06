@@ -7,7 +7,7 @@ result=1
 
 while [ $result != 0 ]
 do 
-    clisp load.lisp
+    clisp -C load.lisp
     result=$?
 
 done
