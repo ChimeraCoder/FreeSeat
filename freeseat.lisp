@@ -1,5 +1,6 @@
 (in-package :freeseat)
 
+;;Input is a GoogleDoc, downloaded as a .csv
 (let* ((filename "FreeSeat Launch Party%21 - Sheet1.csv")
        (processed (initial-processing filename)))
   (defvar *table-max-size* 5)
@@ -17,7 +18,7 @@
       (let ((random-group (get-random-group l)))
         (cons random-group (randomize-list (remove random-group l))))
       '()))
-  
+
 (defun combination-possible (group1 group2)
   (defun can-sit-p-p (person1 person2)
     (not (= (aref *matrix*  person1 person2) *cannot*)))
@@ -66,7 +67,9 @@
 
 
 
-;TODO Figure out how to do parallel-let!
+;;#TODO Figure out how to do parallel-let!
+;;SBCL should be able to do something to its effect with its threading support
+;;#TODO figure out how to run this through SBCL with native threading
 (defun many-parallel-mcmc (groups threads iterations)
   (if (<= threads 0)
       '()

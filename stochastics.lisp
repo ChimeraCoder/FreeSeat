@@ -1,11 +1,8 @@
 (in-package :freeseat)
 
 ;;seeds the random state
-;; don't do this yet!
 (setf *random-state* (make-random-state t)) 
 
-
-;;Assume global constant *MATRIX*
 
 ;;Define the weight to be the size of the group
 (defun calculate-weight (group)
@@ -80,7 +77,7 @@
          (postscore2 (calculate-score hypothetical-table-2))
          (pretotal (+ prescore1 prescore2))
          (posttotal (+ postscore1 postscore2)))
-
+    ;;This next line may be the source of the occasional divide-by-zero error
     (if (or (>= posttotal pretotal ) (> (/ posttotal pretotal) (random 1.0)))
       (list hypothetical-table-1 hypothetical-table-2)
       '())))
