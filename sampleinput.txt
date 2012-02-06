@@ -1,0 +1,10 @@
+; ;'s indicate comments
+; List of tables is represented as space-separated ints in parens
+; must be first non-comment in file
+(10 9 8 7 6)
+; Next comes the guest list...no spaces in names
+(Barbie Ken Tom Jerry)
+; Now seating requests
+; Score Person1 Person2 - score must be a number (-100<=n<=100)
+; Names must not contain spaces, must not begin with a number
+((-100 Tom Jerry) (100 Barbie Ken))

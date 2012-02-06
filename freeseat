@@ -1,0 +1,21 @@
+#! /bin/sh
+
+exec 2> /tmp/freeseat.error
+
+result=1
+
+
+# Sometimes there is a divide-by-zero error, due to a bug in the MCMC implementation
+# Only happens when a randomly picked group has zero size (or something like that)
+# Was the easiest way to fix this before the demo!
+
+while [ $result != 0 ]
+do 
+    clisp -C load.lisp
+    result=$?
+
+done
+
+echo "Success!"
+echo "Here are your seating arrangements."
+

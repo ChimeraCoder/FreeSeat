@@ -1,0 +1,12 @@
+
+Tom must sit with John
+Tom cannot sit with Jamie
+Joseph should sit with Frank
+25 Joseph should sit with Jeremy
+70 Kevin should not sit with Amy
+Kevin must sit with Jeremy and Michael
+Michael cannot sit with Frank or Henry
+Henry must sit with Jeremy, Stephen, Andy
+Stephanie cannot sit with Henry, Kevin, or Tom
+
+
