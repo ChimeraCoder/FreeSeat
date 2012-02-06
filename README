@@ -1,0 +1,41 @@
+FreeSeat is a Common Lisp application designed to aid in planning
+seating for events. If people were reasonable and got along, this
+would be a snap and this application would be wholely
+unneccesary. People, however, are not reasonable and do not get
+along. Some people have "spouses" or "significant others" with whom
+necessarily *must* sit, and some people have "rivals" or "enemies"
+with whom they necessarily *cannot* sit. Similarly, some people have
+"friends" with whom they want to sit, or people who "annoy them" with
+whom they do not want to sit. There are varying degrees of desire in
+these cases.
+
+Rather than encourage everyone to work out their differences
+peacefully and make friends with one another, why not use the power of
+mathematics to construct socially advantageous seating arrangements?
+While a provably optimal solution would be incredibly difficult to
+find, when it comes to dinner parties, "close enough" is close
+enough. This program ensures that as long as all groups of people who
+*must* sit together are together and no two people who *cannot* sit
+together are together, and just does its best with everyone else.
+
+It does so via an optimization technique known as a Markov chain Monte
+Carlo method. Considering the constraints of the problem, it explores
+the state space in search of the seating arrangement with the greatest
+utility.
+
+The program takes input in the form of a CSV file (see the FreeSeat
+launch party document for an example) that has a field for a guest's
+name, a list of people with whom they *must* sit, a list of people
+with whom they *cannot* sit, a list of people that they should sit
+with (scored 0-99), and a list of people that they should not sit with
+(scored 0-99). It groups them currently at tables of size 5, but this
+is trivially changable. The program is invoked using "clisp
+load.lisp". Replace clisp with your favorite Common Lisp interpreter,
+but it's only been tested in clisp.
+
+This program was written for a hackathon, so please ignore the hacks
+used to get it working in a short timeframe (i/o capacities in
+particular) and bugs that escaped our rigorous and extensive (read:
+near-nonexistent) testing.
+
+Happy seating!
